@@ -7,9 +7,13 @@ namespace Haiku.BossHPBars
 {
     internal class HPBar : UE.MonoBehaviour
     {
+        public Func<bool>? modEnabled;
+        public HP? bossHP;
+
         private UE.GameObject? barCanvas;
         private UE.GameObject? barPanel;
         private UE.GameObject? filledPortionPanel;
+        private UI.Image? filledPortion;
 
         public void Start()
         {
@@ -29,12 +33,17 @@ namespace Haiku.BossHPBars
             img.type = UI.Image.Type.Filled;
             img.fillMethod = UI.Image.FillMethod.Horizontal;
             img.fillOrigin = 0;
-            img.fillAmount = 0.71f;
+            filledPortion = img;
         }
 
         public void Update()
         {
-            
+            var active = modEnabled!() && bossHP != null;
+            barCanvas!.SetActive(active);
+            if (active)
+            {
+                filledPortion!.fillAmount = (float)bossHP!.Current() / bossHP!.Max;
+            }
         }
 
         private static UE.Sprite LoadSprite(string name)

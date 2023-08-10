@@ -11,9 +11,26 @@ namespace Haiku.BossHPBars
         public void Start()
         {
             modSettings = new(Config);
-            gameObject.AddComponent<HPBar>();
+            hpBar = gameObject.AddComponent<HPBar>();
+            hpBar.modEnabled = () => modSettings!.ShowBar.Value;
+
+            On.SwingingGarbageMagnet.StartFight += ShowMagnetHP;
+            On.SwingingGarbageMagnet.Die += HideMagnetHP;
+        }
+
+        private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.health);
+        }
+
+        private void HideMagnetHP(On.SwingingGarbageMagnet.orig_Die orig, SwingingGarbageMagnet self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
         }
 
         private Settings? modSettings;
+        private HPBar? hpBar;
     }
 }
