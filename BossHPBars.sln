@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32106.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{3B973572-2BE9-4FD0-A8FD-64FCD8A45644}") = "BossHPBars", "BossHPBars\BossHPBars.csproj", "{BF04D177-3E61-4005-B80C-12B7E669B7E0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF04D177-3E61-4005-B80C-12B7E669B7E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF04D177-3E61-4005-B80C-12B7E669B7E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF04D177-3E61-4005-B80C-12B7E669B7E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF04D177-3E61-4005-B80C-12B7E669B7E0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3A2C0075-8430-49BD-8965-BA54B9C01D42}
+	EndGlobalSection
+EndGlobal
