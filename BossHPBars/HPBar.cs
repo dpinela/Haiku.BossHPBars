@@ -1,4 +1,5 @@
 using UE = UnityEngine;
+using UI = UnityEngine.UI;
 using MAPI = Modding;
 using IO = System.IO;
 
@@ -18,12 +19,17 @@ namespace Haiku.BossHPBars
 
             var barSprite = LoadSprite("bar.png");
             barPanel = MAPI.CanvasUtil.CreateImagePanel(barCanvas, barSprite, new(
-                new(barSprite.rect.width, barSprite.rect.height), new(150, -30)
+                new(barSprite.rect.width, barSprite.rect.height), new(0, 90)
             ));
             var filledBarSprite = LoadSprite("filled_bar.png");
             filledPortionPanel = MAPI.CanvasUtil.CreateImagePanel(barCanvas, filledBarSprite, new(
-                new(filledBarSprite.rect.width, filledBarSprite.rect.height), new(150, -30)
+                new(filledBarSprite.rect.width, filledBarSprite.rect.height), new(0, 90)
             ));
+            var img = filledPortionPanel.GetComponent<UI.Image>();
+            img.type = UI.Image.Type.Filled;
+            img.fillMethod = UI.Image.FillMethod.Horizontal;
+            img.fillOrigin = 0;
+            img.fillAmount = 0.71f;
         }
 
         public void Update()
