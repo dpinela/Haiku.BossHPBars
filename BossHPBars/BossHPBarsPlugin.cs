@@ -1,5 +1,6 @@
 global using System;
 using Bep = BepInEx;
+using static System.Linq.Enumerable;
 
 namespace Haiku.BossHPBars
 {
@@ -17,6 +18,8 @@ namespace Haiku.BossHPBars
             On.SwingingGarbageMagnet.Die += HideMagnetHP;
             On.TiredMother.StartFight += ShowTireMomHP;
             On.TiredMother.Die += HideTireMomHP;
+            On.DrillBoss.StartFight += ShowDrillHP;
+            On.DrillBoss.BossDefeated += HideDrillHP;
         }
 
         private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
@@ -42,6 +45,26 @@ namespace Haiku.BossHPBars
             orig(self);
             hpBar!.bossHP = null;
         }
+
+        private void ShowDrillHP(On.DrillBoss.orig_StartFight orig, DrillBoss self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => DrillHealth(self), DrillHealth(self));
+        }
+
+        private void HideDrillHP(On.DrillBoss.orig_BossDefeated orig, DrillBoss self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
+        }
+
+        private static int DrillHealth(DrillBoss drill) =>
+            drill.bodyPartScripts
+                .Select(p => p.health)
+                // Individual parts can go below 0 health, which would
+                // make a naive sum yield wrong results.
+                .Where(h => h > 0)
+                .Sum();
 
         private Settings? modSettings;
         private HPBar? hpBar;
