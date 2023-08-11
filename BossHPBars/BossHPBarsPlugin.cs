@@ -25,6 +25,10 @@ namespace Haiku.BossHPBars
             On.DoorBoss.DeathSequence += HideDoorHP;
             On.ScubaHead.StartFight += ShowScubaHP;
             On.ScubaBossManager.BossCount += HideScubaHP;
+            On.MischievousMechanic.StartFight += ShowMischievousHP;
+            On.MischievousMechanic.Die += HideMischievousHP;
+            On.BuzzSaw.StartFight += ShowBuzzsawHP;
+            On.BuzzSaw.DeathSequence += HideBuzzsawHP;
         }
 
         private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
@@ -108,6 +112,38 @@ namespace Haiku.BossHPBars
             {
                 hpBar!.bossHP = null;
             }
+        }
+
+        private void ShowMischievousHP(On.MischievousMechanic.orig_StartFight orig, MischievousMechanic self)
+        {
+            // StartFight has this extra condition in it, presumably
+            // because it may be called multiple times.
+            if (!self.fightStarted)
+            {
+                // Mischievous stores their health as a float for some
+                // reason, even though the value is always an integer
+                // from Mathf.FloorToInt.
+                hpBar!.bossHP = new(() => (int)self.currentHealth, (int)self.currentHealth);
+            }
+            orig(self);
+        }
+
+        private void HideMischievousHP(On.MischievousMechanic.orig_Die orig, MischievousMechanic self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
+        }
+
+        private void ShowBuzzsawHP(On.BuzzSaw.orig_StartFight orig, BuzzSaw self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.currentHealth);
+        }
+
+        private SC.IEnumerator HideBuzzsawHP(On.BuzzSaw.orig_DeathSequence orig, BuzzSaw self)
+        {
+            hpBar!.bossHP = null;
+            return orig(self);
         }
 
         private Settings? modSettings;
