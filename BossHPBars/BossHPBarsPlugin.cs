@@ -29,6 +29,10 @@ namespace Haiku.BossHPBars
             On.MischievousMechanic.Die += HideMischievousHP;
             On.BuzzSaw.StartFight += ShowBuzzsawHP;
             On.BuzzSaw.DeathSequence += HideBuzzsawHP;
+            On.BigBrotherCamera.StartFight += ShowBigBrotherHP;
+            On.BigBrotherCamera.StopLoop += HideBigBrotherHP;
+            On.BunkerSentient.StartFight += ShowNeutronHP;
+            On.BunkerSentient.DeathAnimation += HideNeutronHP;
         }
 
         private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
@@ -144,6 +148,30 @@ namespace Haiku.BossHPBars
         {
             hpBar!.bossHP = null;
             return orig(self);
+        }
+
+        private void ShowBigBrotherHP(On.BigBrotherCamera.orig_StartFight orig, BigBrotherCamera self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.currentHealth);
+        }
+
+        private void HideBigBrotherHP(On.BigBrotherCamera.orig_StopLoop orig, BigBrotherCamera self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
+        }
+
+        private void ShowNeutronHP(On.BunkerSentient.orig_StartFight orig, BunkerSentient self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.currentHealth);
+        }
+
+        private void HideNeutronHP(On.BunkerSentient.orig_DeathAnimation orig, BunkerSentient self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
         }
 
         private Settings? modSettings;
