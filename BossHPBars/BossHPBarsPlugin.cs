@@ -1,6 +1,7 @@
 global using System;
 using Bep = BepInEx;
 using MMDetour = MonoMod.RuntimeDetour;
+using USM = UnityEngine.SceneManagement;
 using Reflection = System.Reflection;
 using SC = System.Collections;
 using static System.Linq.Enumerable;
@@ -54,12 +55,15 @@ namespace Haiku.BossHPBars
             new MMDetour.Hook(typeof(DoubleDoorBoss).GetMethod("DefeatedOneBoss", rflags), HideDoubleDoorHP);
             On.CarBattery.StartFight += ShowCarBatteryHP;
             On.CarBattery.DeathSequence += HideCarBatteryHP;
+            On.BeeHive.Update += ShowHideHiveHP;
             On.ElectricSentientRework.StartFight += ShowElectronHP;
             On.ElectricSentientRework.Death += HideElectronHP;
             On.TheVirus.StartFight += ShowVirusHP;
             On.VirusDefeated.Start += HideVirusHP;
             new MMDetour.Hook(typeof(UncorruptVirusBoss).GetMethod("StartFight", rflags), ShowAtomHP);
             new MMDetour.Hook(typeof(UncorruptVirusDefeated).GetMethod("Start", rflags), HideAtomHP);
+
+            USM.SceneManager.activeSceneChanged += HideBarOnExit;
         }
 
         private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
@@ -306,6 +310,22 @@ namespace Haiku.BossHPBars
             return orig(self);
         }
 
+        private void ShowHideHiveHP(On.BeeHive.orig_Update orig, BeeHive self)
+        {
+            orig(self);
+            if (hpBar!.bossHP == null)
+            {
+                if (self.playerInRange && self.state != BeeHive.State.Dead)
+                {
+                    hpBar!.bossHP = new(() => self.health, self.initialHealth);
+                }
+            }
+            else if (self.state == BeeHive.State.Dead)
+            {
+                hpBar!.bossHP = null;
+            }
+        }
+
         private void ShowElectronHP(On.ElectricSentientRework.orig_StartFight orig, ElectricSentientRework self)
         {
             orig(self);
@@ -339,6 +359,11 @@ namespace Haiku.BossHPBars
         private void HideAtomHP(Action<UncorruptVirusDefeated> orig, UncorruptVirusDefeated self)
         {
             orig(self);
+            hpBar!.bossHP = null;
+        }
+
+        private void HideBarOnExit(USM.Scene from, USM.Scene to)
+        {
             hpBar!.bossHP = null;
         }
 
