@@ -15,7 +15,7 @@ namespace Haiku.BossHPBars
         {
             modSettings = new(Config);
             hpBar = gameObject.AddComponent<HPBar>();
-            hpBar.modEnabled = () => modSettings!.ShowBar.Value;
+            hpBar.modSettings = () => modSettings!;
 
             var rflags = 
                 Reflection.BindingFlags.Public | 

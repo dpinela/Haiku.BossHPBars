@@ -7,12 +7,14 @@ namespace Haiku.BossHPBars
 {
     internal class HPBar : UE.MonoBehaviour
     {
-        public Func<bool>? modEnabled;
+        public Func<Settings>? modSettings;
         public HP? bossHP;
 
         private UE.GameObject? barCanvas;
         private UE.GameObject? barPanel;
         private UE.GameObject? filledPortionPanel;
+        private UE.GameObject? numberPanel;
+        private UI.Text? numberText;
         private UI.Image? filledPortion;
 
         public void Start()
@@ -22,13 +24,16 @@ namespace Haiku.BossHPBars
             barCanvas.transform.SetParent(gameObject.transform);
 
             var barSprite = LoadSprite("bar.png");
-            barPanel = MAPI.CanvasUtil.CreateImagePanel(barCanvas, barSprite, new(
+            var barRect = new MAPI.CanvasUtil.RectData(
                 new(barSprite.rect.width, barSprite.rect.height), new(0, 90)
-            ));
+            );
+            barPanel = MAPI.CanvasUtil.CreateImagePanel(barCanvas, barSprite, barRect);
             var filledBarSprite = LoadSprite("filled_bar.png");
             filledPortionPanel = MAPI.CanvasUtil.CreateImagePanel(barCanvas, filledBarSprite, new(
                 new(filledBarSprite.rect.width, filledBarSprite.rect.height), new(0, 90)
             ));
+            numberPanel = MAPI.CanvasUtil.CreateTextPanel(barCanvas, "", 7, UE.TextAnchor.MiddleCenter, barRect, MAPI.CanvasUtil.GameFont);
+            numberText = numberPanel.GetComponent<UI.Text>();
             var img = filledPortionPanel.GetComponent<UI.Image>();
             img.type = UI.Image.Type.Filled;
             img.fillMethod = UI.Image.FillMethod.Horizontal;
@@ -38,11 +43,34 @@ namespace Haiku.BossHPBars
 
         public void Update()
         {
-            var active = modEnabled!() && bossHP != null;
-            barCanvas!.SetActive(active);
-            if (active)
+            if (bossHP is HP hp)
             {
-                filledPortion!.fillAmount = (float)bossHP!.Current() / bossHP!.Max;
+                var barActive = modSettings!().ShowBar.Value;
+                var numsActive = modSettings!().ShowNumbers.Value;
+                if (!(barActive || numsActive))
+                {
+                    barCanvas!.SetActive(false);
+                    return;
+                }
+                barCanvas!.SetActive(true);
+
+                var chp = hp.Current();
+                barPanel!.SetActive(barActive);
+                filledPortionPanel!.SetActive(barActive);
+                if (barActive)
+                {
+                    filledPortion!.fillAmount = (float)chp / hp.Max;
+                }
+                
+                numberPanel!.SetActive(numsActive);
+                if (numsActive)
+                {
+                    numberText!.text = $"{chp} / {hp.Max}";
+                }
+            }
+            else
+            {
+                barCanvas!.SetActive(false);
             }
         }
 
