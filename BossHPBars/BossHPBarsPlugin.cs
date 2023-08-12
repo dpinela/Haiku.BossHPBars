@@ -30,6 +30,8 @@ namespace Haiku.BossHPBars
             On.DrillBoss.BossDefeated += HideDrillHP;
             On.DoorBoss.StartFight += ShowDoorHP;
             On.DoorBoss.DeathSequence += HideDoorHP;
+            On.FightManager.StartFight += ShowTrioHP;
+            On.FightManager.ReduceHealth += HideTrioHP;
             On.ScubaHead.StartFight += ShowScubaHP;
             On.ScubaBossManager.BossCount += HideScubaHP;
             On.MischievousMechanic.StartFight += ShowMischievousHP;
@@ -109,6 +111,26 @@ namespace Haiku.BossHPBars
             hpBar!.bossHP = null;
             return orig(self);
         }
+
+        private void ShowTrioHP(On.FightManager.orig_StartFight orig, FightManager self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => TrioHealth(self), TrioHealth(self));
+        }
+
+        private void HideTrioHP(On.FightManager.orig_ReduceHealth orig, FightManager self, string boss, int n)
+        {
+            orig(self, boss, n);
+            if (!self.bAlive && !self.eAlive && !self.fAlive)
+            {
+                hpBar!.bossHP = null;
+            }
+        }
+
+        private static int TrioHealth(FightManager fm) =>
+            (fm.bAlive ? fm.bHealth : 0) +
+            (fm.eAlive ? fm.eHealth : 0) +
+            (fm.fAlive ? fm.fHealth : 0);
 
         private void ShowScubaHP(On.ScubaHead.orig_StartFight orig, ScubaHead self)
         {
