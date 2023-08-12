@@ -48,12 +48,16 @@ namespace Haiku.BossHPBars
             new MMDetour.Hook(typeof(TvBoss).GetMethod("DeathSequence", rflags), HideTVHP);
             new MMDetour.Hook(typeof(ReactorCore).GetMethod("StartFight", rflags), ShowElegyHP);
             new MMDetour.Hook(typeof(ReactorCore).GetMethod("DeathSequence", rflags), HideElegyHP);
+            new MMDetour.Hook(typeof(DoubleDoorBoss).GetMethod("StartFight", rflags), ShowDoubleDoorHP);
+            new MMDetour.Hook(typeof(DoubleDoorBoss).GetMethod("DefeatedOneBoss", rflags), HideDoubleDoorHP);
             On.CarBattery.StartFight += ShowCarBatteryHP;
             On.CarBattery.DeathSequence += HideCarBatteryHP;
             On.ElectricSentientRework.StartFight += ShowElectronHP;
             On.ElectricSentientRework.Death += HideElectronHP;
             On.TheVirus.StartFight += ShowVirusHP;
             On.VirusDefeated.Start += HideVirusHP;
+            new MMDetour.Hook(typeof(UncorruptVirusBoss).GetMethod("StartFight", rflags), ShowAtomHP);
+            new MMDetour.Hook(typeof(UncorruptVirusDefeated).GetMethod("Start", rflags), HideAtomHP);
         }
 
         private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
@@ -251,6 +255,26 @@ namespace Haiku.BossHPBars
             hpBar!.bossHP = null;
         }
 
+        private void ShowDoubleDoorHP(Action<DoubleDoorBoss> orig, DoubleDoorBoss self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => DoubleDoorHealth(self), DoubleDoorHealth(self));
+        }
+
+        private void HideDoubleDoorHP(Action<DoubleDoorBoss> orig, DoubleDoorBoss self)
+        {
+            orig(self);
+            // This method is called once for each of the individual doors.
+            if (self.defeated == 2)
+            {
+                hpBar!.bossHP = null;
+            }
+        }
+
+        private static int DoubleDoorHealth(DoubleDoorBoss doors) =>
+            (doors.door1.dead ? 0 : doors.door1.currentHealth) +
+            (doors.door2.dead ? 0 : doors.door2.currentHealth);
+
         private void ShowCarBatteryHP(On.CarBattery.orig_StartFight orig, CarBattery self)
         {
             orig(self);
@@ -282,6 +306,18 @@ namespace Haiku.BossHPBars
         }
 
         private void HideVirusHP(On.VirusDefeated.orig_Start orig, VirusDefeated self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
+        }
+
+        private void ShowAtomHP(Action<UncorruptVirusBoss> orig, UncorruptVirusBoss self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.currentHealth);
+        }
+
+        private void HideAtomHP(Action<UncorruptVirusDefeated> orig, UncorruptVirusDefeated self)
         {
             orig(self);
             hpBar!.bossHP = null;
