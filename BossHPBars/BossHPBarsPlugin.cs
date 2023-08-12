@@ -46,7 +46,9 @@ namespace Haiku.BossHPBars
             On.BunkerSentient.DeathAnimation += HideNeutronHP;
             new MMDetour.Hook(typeof(TvBoss).GetMethod("StartFight", rflags), ShowTVHP);
             new MMDetour.Hook(typeof(TvBoss).GetMethod("DeathSequence", rflags), HideTVHP);
-            new MMDetour.Hook(typeof(ReactorCore).GetMethod("StartFight", rflags), ShowElegyHP);
+            // StartFight is called too early on Elegy, before the health
+            // pool adjustment is made.
+            new MMDetour.Hook(typeof(ReactorCore).GetMethod("Start", rflags), ShowElegyHP);
             new MMDetour.Hook(typeof(ReactorCore).GetMethod("DeathSequence", rflags), HideElegyHP);
             new MMDetour.Hook(typeof(DoubleDoorBoss).GetMethod("StartFight", rflags), ShowDoubleDoorHP);
             new MMDetour.Hook(typeof(DoubleDoorBoss).GetMethod("DefeatedOneBoss", rflags), HideDoubleDoorHP);
