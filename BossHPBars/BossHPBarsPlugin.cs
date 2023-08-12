@@ -85,17 +85,34 @@ namespace Haiku.BossHPBars
             orig(self);
             hpBar!.bossHP = null;
         }
-
+        
         private void ShowDrillHP(On.DrillBoss.orig_StartFight orig, DrillBoss self)
         {
             orig(self);
-            hpBar!.bossHP = new(() => DrillHealth(self), DrillHealth(self));
+            // In the boss rush mode, there are two DrillBoss objects in the
+            // scene at once. Both call StartFight at the start of the fight.
+            if (hpBar!.bossHP is HP firstDrillHP)
+            {
+                hpBar!.bossHP = new(
+                    () => firstDrillHP.Current() + DrillHealth(self),
+                    firstDrillHP.Max + DrillHealth(self)
+                );
+            }
+            else
+            {
+                hpBar!.bossHP = new(() => DrillHealth(self), DrillHealth(self));
+            }
         }
 
         private void HideDrillHP(On.DrillBoss.orig_BossDefeated orig, DrillBoss self)
         {
             orig(self);
-            hpBar!.bossHP = null;
+            // The HP bar must stay up as long as at least one drill remains
+            // alive.
+            if (!self.bossRush || self.drillBossRush.currentBossesDead == self.drillBossRush.numberOfBosses)
+            {
+                hpBar!.bossHP = null;
+            }
         }
 
         private static int DrillHealth(DrillBoss drill) =>
