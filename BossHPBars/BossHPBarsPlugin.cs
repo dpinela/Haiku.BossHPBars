@@ -1,5 +1,7 @@
 global using System;
 using Bep = BepInEx;
+using MMDetour = MonoMod.RuntimeDetour;
+using Reflection = System.Reflection;
 using SC = System.Collections;
 using static System.Linq.Enumerable;
 
@@ -14,6 +16,11 @@ namespace Haiku.BossHPBars
             modSettings = new(Config);
             hpBar = gameObject.AddComponent<HPBar>();
             hpBar.modEnabled = () => modSettings!.ShowBar.Value;
+
+            var rflags = 
+                Reflection.BindingFlags.Public | 
+                Reflection.BindingFlags.NonPublic | 
+                Reflection.BindingFlags.Instance;
 
             On.SwingingGarbageMagnet.StartFight += ShowMagnetHP;
             On.SwingingGarbageMagnet.Die += HideMagnetHP;
@@ -33,6 +40,8 @@ namespace Haiku.BossHPBars
             On.BigBrotherCamera.StopLoop += HideBigBrotherHP;
             On.BunkerSentient.StartFight += ShowNeutronHP;
             On.BunkerSentient.DeathAnimation += HideNeutronHP;
+            new MMDetour.Hook(typeof(TvBoss).GetMethod("StartFight", rflags), ShowTVHP);
+            new MMDetour.Hook(typeof(TvBoss).GetMethod("DeathSequence", rflags), HideTVHP);
         }
 
         private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
@@ -172,6 +181,18 @@ namespace Haiku.BossHPBars
         {
             orig(self);
             hpBar!.bossHP = null;
+        }
+
+        private void ShowTVHP(Action<TvBoss> orig, TvBoss self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.currentHealth);
+        }
+
+        private SC.IEnumerator HideTVHP(Func<TvBoss, SC.IEnumerator> orig, TvBoss self)
+        {
+            hpBar!.bossHP = null;
+            return orig(self);
         }
 
         private Settings? modSettings;
