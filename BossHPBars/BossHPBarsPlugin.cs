@@ -38,14 +38,20 @@ namespace Haiku.BossHPBars
             On.BuzzSaw.DeathSequence += HideBuzzsawHP;
             On.BigBrotherCamera.StartFight += ShowBigBrotherHP;
             On.BigBrotherCamera.StopLoop += HideBigBrotherHP;
+            On.FactorySentient.StartFight += ShowProtonHP;
+            On.FactorySentient.DeathAnimation += HideProtonHP;
             On.BunkerSentient.StartFight += ShowNeutronHP;
             On.BunkerSentient.DeathAnimation += HideNeutronHP;
             new MMDetour.Hook(typeof(TvBoss).GetMethod("StartFight", rflags), ShowTVHP);
             new MMDetour.Hook(typeof(TvBoss).GetMethod("DeathSequence", rflags), HideTVHP);
+            new MMDetour.Hook(typeof(ReactorCore).GetMethod("StartFight", rflags), ShowElegyHP);
+            new MMDetour.Hook(typeof(ReactorCore).GetMethod("DeathSequence", rflags), HideElegyHP);
             On.CarBattery.StartFight += ShowCarBatteryHP;
             On.CarBattery.DeathSequence += HideCarBatteryHP;
             On.ElectricSentientRework.StartFight += ShowElectronHP;
             On.ElectricSentientRework.Death += HideElectronHP;
+            On.TheVirus.StartFight += ShowVirusHP;
+            On.VirusDefeated.Start += HideVirusHP;
         }
 
         private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
@@ -175,6 +181,18 @@ namespace Haiku.BossHPBars
             hpBar!.bossHP = null;
         }
 
+        private void ShowProtonHP(On.FactorySentient.orig_StartFight orig, FactorySentient self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.health);
+        }
+
+        private void HideProtonHP(On.FactorySentient.orig_DeathAnimation orig, FactorySentient self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
+        }
+
         private void ShowNeutronHP(On.BunkerSentient.orig_StartFight orig, BunkerSentient self)
         {
             orig(self);
@@ -199,6 +217,18 @@ namespace Haiku.BossHPBars
             return orig(self);
         }
 
+        private void ShowElegyHP(Action<ReactorCore> orig, ReactorCore self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.currentHealth);
+        }
+
+        private void HideElegyHP(Action<ReactorCore> orig, ReactorCore self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
+        }
+
         private void ShowCarBatteryHP(On.CarBattery.orig_StartFight orig, CarBattery self)
         {
             orig(self);
@@ -218,6 +248,18 @@ namespace Haiku.BossHPBars
         }
 
         private void HideElectronHP(On.ElectricSentientRework.orig_Death orig, ElectricSentientRework self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
+        }
+
+        private void ShowVirusHP(On.TheVirus.orig_StartFight orig, TheVirus self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.currentHealth);
+        }
+
+        private void HideVirusHP(On.VirusDefeated.orig_Start orig, VirusDefeated self)
         {
             orig(self);
             hpBar!.bossHP = null;
