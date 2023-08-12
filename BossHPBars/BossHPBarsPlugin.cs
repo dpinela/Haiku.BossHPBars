@@ -42,6 +42,10 @@ namespace Haiku.BossHPBars
             On.BunkerSentient.DeathAnimation += HideNeutronHP;
             new MMDetour.Hook(typeof(TvBoss).GetMethod("StartFight", rflags), ShowTVHP);
             new MMDetour.Hook(typeof(TvBoss).GetMethod("DeathSequence", rflags), HideTVHP);
+            On.CarBattery.StartFight += ShowCarBatteryHP;
+            On.CarBattery.DeathSequence += HideCarBatteryHP;
+            On.ElectricSentientRework.StartFight += ShowElectronHP;
+            On.ElectricSentientRework.Death += HideElectronHP;
         }
 
         private void ShowMagnetHP(On.SwingingGarbageMagnet.orig_StartFight orig, SwingingGarbageMagnet self)
@@ -193,6 +197,30 @@ namespace Haiku.BossHPBars
         {
             hpBar!.bossHP = null;
             return orig(self);
+        }
+
+        private void ShowCarBatteryHP(On.CarBattery.orig_StartFight orig, CarBattery self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.currentHealth);
+        }
+
+        private SC.IEnumerator HideCarBatteryHP(On.CarBattery.orig_DeathSequence orig, CarBattery self)
+        {
+            hpBar!.bossHP = null;
+            return orig(self);
+        }
+
+        private void ShowElectronHP(On.ElectricSentientRework.orig_StartFight orig, ElectricSentientRework self)
+        {
+            orig(self);
+            hpBar!.bossHP = new(() => self.currentHealth, self.health);
+        }
+
+        private void HideElectronHP(On.ElectricSentientRework.orig_Death orig, ElectricSentientRework self)
+        {
+            orig(self);
+            hpBar!.bossHP = null;
         }
 
         private Settings? modSettings;
