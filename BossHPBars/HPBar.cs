@@ -25,12 +25,12 @@ namespace Haiku.BossHPBars
 
             var barSprite = LoadSprite("bar.png");
             var barRect = new MAPI.CanvasUtil.RectData(
-                new(barSprite.rect.width, barSprite.rect.height), new(0, 90)
+                new(barSprite.rect.width, barSprite.rect.height), new(0, 100)
             );
             barPanel = MAPI.CanvasUtil.CreateImagePanel(barCanvas, barSprite, barRect);
             var filledBarSprite = LoadSprite("filled_bar.png");
             filledPortionPanel = MAPI.CanvasUtil.CreateImagePanel(barCanvas, filledBarSprite, new(
-                new(filledBarSprite.rect.width, filledBarSprite.rect.height), new(0, 90)
+                new(filledBarSprite.rect.width, filledBarSprite.rect.height), new(0, 100)
             ));
             numberPanel = MAPI.CanvasUtil.CreateTextPanel(barCanvas, "", 7, UE.TextAnchor.MiddleCenter, barRect, MAPI.CanvasUtil.GameFont);
             numberText = numberPanel.GetComponent<UI.Text>();
@@ -81,7 +81,7 @@ namespace Haiku.BossHPBars
             var tex = new UE.Texture2D(1, 1, UE.TextureFormat.RGBA32, false);
             UE.ImageConversion.LoadImage(tex, imageData, true);
             tex.filterMode = UE.FilterMode.Point;
-            return UE.Sprite.Create(tex, new UE.Rect(0, 0, tex.width, tex.height), new UE.Vector2(.5f, .5f), 100);
+            return UE.Sprite.Create(tex, new UE.Rect(0, 0, tex.width, tex.height), new UE.Vector2(.5f, .5f), 150);
         }
     }
 }
